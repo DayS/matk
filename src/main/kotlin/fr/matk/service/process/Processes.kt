@@ -35,6 +35,8 @@ object Processes {
                 b.directory(directory)
             }
 
+            b.inheritIO()
+
             try {
                 b.start()
             } catch (e: IOException) {
@@ -50,17 +52,6 @@ object Processes {
                 }
             }
 
-            val error = Observable.create<String> { emitter ->
-                process.errorStream.bufferedReader().use {
-                    val error = it.lineSequence().joinToString("\n")
-                    if (error.isNotBlank()) {
-                        emitter.onError(ExecProcessException(-1, error))
-                    } else {
-                        emitter.onComplete()
-                    }
-                }
-            }
-
             val completion = Observable.create<String> { emitter ->
                 val exitCode = process.waitFor()
                 if (exitCode != 0) {
@@ -70,8 +61,7 @@ object Processes {
                 }
             }
 
-            Observable.merge(output, error)
-                .concatWith(completion)
+            output.concatWith(completion)
         }
 
         val disposeAction = Consumer<Process> {
