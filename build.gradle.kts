@@ -24,6 +24,9 @@ dependencies {
     compile("io.reactivex.rxjava2:rxkotlin:2.4.0")
     compile("io.reactivex.rxjava2:rxjava:2.2.15")
 
+    // DI
+    compile("org.koin:koin-core:2.0.1")
+
     // CLI
     compile("com.github.ajalt:clikt:2.3.0")
 
