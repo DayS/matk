@@ -7,7 +7,8 @@ class ApkCommand : NoRunCliktCommand(name = "apk", help = "Interaction with APK 
     init {
         subcommands(
             ApkPullCommand(),
-            ApkDecompileCommand()
+            ApkDecompileCommand(),
+            ApkRecompileCommand()
         )
     }
 }

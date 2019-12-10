@@ -14,7 +14,7 @@ class Cache(private val cacheFolder: File) {
         private val logger by LoggerDelegate()
     }
 
-    private fun cachedFile(relativePath: String) = File(cacheFolder, relativePath)
+    fun cachedFile(relativePath: String) = File(cacheFolder, relativePath)
 
     fun getOrDownload(relativePath: String, url: URL): Single<File> =
         getOrFetch(relativePath, download(url, cachedFile(relativePath)))
