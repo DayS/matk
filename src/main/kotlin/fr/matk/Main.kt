@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.NoRunCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.squareup.moshi.Moshi
 import fr.matk.command.apk.ApkCommand
+import fr.matk.command.device.DeviceCommand
 import fr.matk.service.Cache
 import okhttp3.OkHttpClient
 import org.koin.core.context.startKoin
@@ -25,5 +26,6 @@ fun main(args: Array<String>) {
 
     Matk()
         .subcommands(ApkCommand())
+        .subcommands(DeviceCommand())
         .main(args)
 }
