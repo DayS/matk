@@ -1,1 +1,1 @@
-rootProject.name = "mobile-analysis-toolkit"
+rootProject.name = "matk"
