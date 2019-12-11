@@ -55,8 +55,8 @@ object Processes {
                         }
                         emitter.onNext(line)
                     }
-                    emitter.onComplete()
                 }
+                emitter.onComplete()
             }
 
             val completion = Observable.create<String> { emitter ->
