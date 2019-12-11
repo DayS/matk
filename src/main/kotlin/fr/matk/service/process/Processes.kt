@@ -11,23 +11,25 @@ import java.util.concurrent.Callable
 
 object Processes {
 
-    private val LOGGER: Logger by LoggerDelegate()
+    private val logger: Logger by LoggerDelegate()
 
     fun execute(
         vararg commandAndArgs: String,
         env: Map<String, String> = emptyMap(),
-        directory: File? = null
+        directory: File? = null,
+        verbose: Boolean = false
     ): Observable<String> {
-        return execute(commandAndArgs.asList(), env, directory)
+        return execute(commandAndArgs.asList(), env, directory, verbose)
     }
 
     fun execute(
         commandAndArgs: List<String>,
         env: Map<String, String> = emptyMap(),
-        directory: File? = null
+        directory: File? = null,
+        verbose: Boolean = false
     ): Observable<String> {
         val resourceFactory = Callable<Process> {
-            LOGGER.trace("Execute process {}", commandAndArgs)
+            logger.trace("Execute process {}", commandAndArgs)
 
             val b = ProcessBuilder(commandAndArgs)
             b.environment().putAll(env)
@@ -35,7 +37,7 @@ object Processes {
                 b.directory(directory)
             }
 
-            b.inheritIO()
+            b.redirectError(b.redirectInput())
 
             try {
                 b.start()
@@ -47,13 +49,23 @@ object Processes {
         val factory = Function<Process, Observable<String>> { process ->
             val output = Observable.create<String> { emitter ->
                 process.inputStream.bufferedReader().use {
-                    it.lineSequence().forEach { line -> emitter.onNext(line) }
+                    it.forEachLine { line ->
+                        if (verbose) {
+                            logger.trace("[{}] {}", process.pid(), line)
+                        }
+                        emitter.onNext(line)
+                    }
                     emitter.onComplete()
                 }
             }
 
             val completion = Observable.create<String> { emitter ->
                 val exitCode = process.waitFor()
+
+                if (verbose) {
+                    logger.trace("[{}] Exit {}", process.pid(), exitCode)
+                }
+
                 if (exitCode != 0) {
                     emitter.onError(ExecProcessException(exitCode, null))
                 } else {
