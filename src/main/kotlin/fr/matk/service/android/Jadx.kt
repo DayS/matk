@@ -54,7 +54,7 @@ class Jadx private constructor(private val binary: File) {
         logger.info("Looking for DEX to decompile as Java files from {}", lookupFolder)
 
         Single.just(lookupFolder)
-            .flattenAsObservable { it.listFiles { _, name -> name.matches(patternDexFile) }!!.toList() }
+            .flattenAsObservable { it.listFiles { _, name -> name.matches(patternDexFile) }?.toList() }
             .doOnNext { logger.debug("Decompiling DEX {}", it) }
             .concatMapSingle { decompileDex(it, lookupFolder) }
             .ignoreElements()
