@@ -11,7 +11,7 @@ import fr.matk.utils.LoggerDelegate
 import java.io.File
 
 class ApkRecompileCommand : CliktCommand(name = "recompile") {
-    private val projectPath by argument("<project_path>", "Path to project to recompile")
+    private val projectPath by argument("project_path", "Path to project to recompile")
     private val outputApkPath by option("-o", "--output-apk-path", metavar = "output_apk_path", help = "Path to APK to generate")
     private val keystorePath by option("-k", "--keystore-path", metavar = "keystore_path", help = "Keystore to use for APK signature or use a generated one")
     private val keystoreAlias by option("-a", "--keystore-alias", metavar = "keystore_alias", help = "Keystore's alias").default("matk")

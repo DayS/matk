@@ -10,7 +10,7 @@ import io.reactivex.functions.BiFunction
 import java.io.File
 
 class ApkDecompileCommand : CliktCommand(name = "decompile") {
-    private val apkPath by argument("<apk_path>", "Path to APK to decompile")
+    private val apkPath by argument("apk_path", "Path to APK to decompile")
 
     private val logger by LoggerDelegate()
 

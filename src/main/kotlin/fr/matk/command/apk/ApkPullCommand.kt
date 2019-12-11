@@ -13,7 +13,7 @@ import io.reactivex.Single
 import java.io.File
 
 class ApkPullCommand : CliktCommand(name = "pull") {
-    private val packageName by argument("<package_name>", "APK identifier as it may appears on the play store. It doesn't have to be an exact match")
+    private val packageName by argument("package_name", "APK identifier as it may appears on the play store. It doesn't have to be an exact match")
     private val localFile by argument("local_file", "Path to a file on the host where the APK should be pulled").optional()
     private val device by deviceOption()
     private val exactMatch by option("-e", "--exact", help = "Indicate if the <package_name> should be an exact match").flag()
