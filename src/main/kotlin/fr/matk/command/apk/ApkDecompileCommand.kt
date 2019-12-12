@@ -2,6 +2,7 @@ package fr.matk.command.apk
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.types.file
 import fr.matk.service.android.Apktool
 import fr.matk.service.android.Jadx
 import fr.matk.utils.LoggerDelegate
@@ -10,7 +11,7 @@ import io.reactivex.functions.BiFunction
 import java.io.File
 
 class ApkDecompileCommand : CliktCommand(name = "decompile") {
-    private val apkPath by argument("apk_path", "Path to APK to decompile")
+    private val apkFile by argument("apk_path", "Path to APK to decompile").file()
 
     private val logger by LoggerDelegate()
 
@@ -18,8 +19,7 @@ class ApkDecompileCommand : CliktCommand(name = "decompile") {
     private val jadxFactory = Jadx.Factory().build(Apktool.VERSION_LATEST)
 
     override fun run() {
-        val apkFile = File(apkPath)
-        val outputFile = File("$apkPath.out")
+        val outputFile = File("${apkFile.absolutePath}.out")
 
         Single.zip(apktoolFactory, jadxFactory, BiFunction { apktool: Apktool, jadx: Jadx -> Pair(apktool, jadx) })
             .flatMap { tools ->
