@@ -6,7 +6,8 @@ import com.github.ajalt.clikt.core.subcommands
 class DeviceCommand : NoRunCliktCommand(name = "device") {
     init {
         subcommands(
-            DeviceInstallPlayStoreCommand()
+            DeviceInstallPlayStoreCommand(),
+            DeviceMitmCommand()
         )
     }
 }
