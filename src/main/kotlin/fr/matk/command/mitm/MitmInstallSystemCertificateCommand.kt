@@ -1,4 +1,4 @@
-package fr.matk.command.device
+package fr.matk.command.mitm
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
@@ -10,37 +10,35 @@ import com.github.ajalt.clikt.parameters.types.file
 import fr.matk.command.deviceOption
 import fr.matk.extensions.joinToString
 import fr.matk.service.android.Adb
-import fr.matk.service.android.PlayStore
 import fr.matk.service.certificate.Certificate
 import fr.matk.service.certificate.Source
 import fr.matk.utils.LoggerDelegate
 import java.io.File
 
-sealed class SourceOption(name: String) : OptionGroup(name) {
-    abstract fun getSource(): Source
+class MitmInstallSystemCertificateCommand : CliktCommand(name = "install-certificate", help = "Install a SSL certificate as system certificate to enable MITM attack") {
+    private sealed class SourceOption(name: String) : OptionGroup(name) {
+        abstract fun getSource(): Source
 
-    class File : SourceOption("Use a direct path to certificate") {
-        val path by option("--path").file().required()
+        class File : SourceOption("Use a direct path to certificate") {
+            private val path by option("--path").file().required()
 
-        override fun getSource(): Source = Source.DirectFile(path)
+            override fun getSource(): Source = Source.DirectFile(path)
+        }
+
+        class Charles : SourceOption("Use Charles Proxy to export his own certificate") {
+            override fun getSource() = Source.Charles
+        }
     }
 
-    class Charles : SourceOption("Use Charles Proxy to export his own certificate") {
-        override fun getSource() = Source.Charles
-    }
-}
-
-class DeviceMitmCommand : CliktCommand(name = "mitm", help = "Install a SSL certificate as system certificate to enable MITM attack") {
-    val source by option("-s", "--source", help = "Must be one of : charles, file").groupChoice(
-        "charles" to SourceOption.Charles(),
-        "file" to SourceOption.File()
+    private val source by option("-s", "--source", help = "Must be one of : file, charles").groupChoice(
+        "file" to SourceOption.File(),
+        "charles" to SourceOption.Charles()
     ).required()
 
     private val device by deviceOption()
 
     private val logger by LoggerDelegate()
     private val adb = Adb(device)
-    private val playStore = PlayStore()
 
     override fun run() {
         val certificate = Certificate.Factory().build(source.getSource())

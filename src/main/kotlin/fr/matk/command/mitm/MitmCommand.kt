@@ -1,12 +1,12 @@
-package fr.matk.command.device
+package fr.matk.command.mitm
 
 import com.github.ajalt.clikt.core.NoRunCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 
-class DeviceCommand : NoRunCliktCommand(name = "device") {
+class MitmCommand : NoRunCliktCommand(name = "mitm") {
     init {
         subcommands(
-            DeviceInstallPlayStoreCommand()
+            MitmInstallSystemCertificateCommand()
         )
     }
 }
