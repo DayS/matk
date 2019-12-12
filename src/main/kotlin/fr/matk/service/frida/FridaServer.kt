@@ -5,7 +5,6 @@ import fr.matk.service.android.Adb
 import fr.matk.service.process.Processes
 import fr.matk.utils.Github
 import fr.matk.utils.LoggerDelegate
-import io.reactivex.Observable
 import io.reactivex.Single
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -63,13 +62,6 @@ class FridaServer private constructor(private val binary: File) {
 
         adb.root()
             .flatMap { adb.pushFile(binary, remotePath, 755) }
-    }
-
-    fun start(adb: Adb, remotePath: File) = Observable.defer<String> {
-        logger.debug("Starting Frida server from $remotePath")
-
-        adb.root()
-            .flatMapObservable { adb.shell(remotePath.absolutePath) }
     }
 
     fun retrievePid(adb: Adb): Single<Int> {
