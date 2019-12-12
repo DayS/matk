@@ -48,15 +48,25 @@ object Processes {
 
         val factory = Function<Process, Observable<String>> { process ->
             val output = Observable.create<String> { emitter ->
-                process.inputStream.bufferedReader().use {
-                    it.forEachLine { line ->
-                        if (verbose) {
-                            logger.trace("[{}] {}", process.pid(), line)
+                try {
+                    process.inputStream.bufferedReader().use {
+                        it.forEachLine { line ->
+                            if (emitter.isDisposed) {
+                                throw InterruptedProcessException()
+                            }
+
+                            if (verbose) {
+                                logger.trace("[{}] {}", process.pid(), line)
+                            }
+                            emitter.onNext(line)
                         }
-                        emitter.onNext(line)
+                    }
+                    emitter.onComplete()
+                } catch (e: Exception) {
+                    if (e !is InterruptedProcessException) {
+                        emitter.onError(e)
                     }
                 }
-                emitter.onComplete()
             }
 
             val completion = Observable.create<String> { emitter ->

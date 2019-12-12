@@ -8,3 +8,5 @@ class StartProcessException(message: String? = null, cause: Throwable? = null) :
 
 class ExecProcessException(exitCode: Int, val output: String?, cause: Throwable? = null) :
     ProcessException("Process execution failed with code $exitCode", cause)
+
+class InterruptedProcessException : InterruptedException()
