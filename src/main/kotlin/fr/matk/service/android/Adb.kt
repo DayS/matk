@@ -33,9 +33,11 @@ class Adb(private val deviceId: String?, private val adbCommand: String = "adb")
      * Push a file to the connected device
      */
     fun pushFile(localPath: File, remotePath: File, chmod: Int? = null): Single<File> =
-        execOnDevice("push", localPath.absolutePath, remotePath.absolutePath).also {
+        execOnDevice("push", localPath.absolutePath, remotePath.absolutePath).let {
             if (chmod != null) {
                 it.flatMap { shell("chmod", chmod.toString(), remotePath.absolutePath) }
+            } else {
+                it
             }
         }
             .ignoreElements()
