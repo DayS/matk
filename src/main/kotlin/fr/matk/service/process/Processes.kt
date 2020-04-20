@@ -17,16 +17,18 @@ object Processes {
         vararg commandAndArgs: String,
         env: Map<String, String> = emptyMap(),
         directory: File? = null,
-        verbose: Boolean = false
+        verbose: Boolean = false,
+        validExitCodes: List<Int> = listOf(0)
     ): Observable<String> {
-        return execute(commandAndArgs.asList(), env, directory, verbose)
+        return execute(commandAndArgs.asList(), env, directory, verbose, validExitCodes)
     }
 
     fun execute(
         commandAndArgs: List<String>,
         env: Map<String, String> = emptyMap(),
         directory: File? = null,
-        verbose: Boolean = false
+        verbose: Boolean = false,
+        validExitCodes: List<Int> = listOf(0)
     ): Observable<String> {
         val resourceFactory = Callable<Process> {
             logger.trace("Execute process {}", commandAndArgs)
@@ -76,10 +78,10 @@ object Processes {
                     logger.trace("[{}] Exit {}", process.pid(), exitCode)
                 }
 
-                if (exitCode != 0) {
-                    emitter.onError(ExecProcessException(exitCode, null))
-                } else {
+                if (validExitCodes.contains(exitCode)) {
                     emitter.onComplete()
+                } else {
+                    emitter.onError(ExecProcessException(exitCode, null))
                 }
             }
 

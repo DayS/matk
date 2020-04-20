@@ -43,7 +43,7 @@ class Apktool private constructor(private val binary: File) {
         logger.info("Decompiling resources and code as Smali from {}", apkPath)
 
         exec("decode", "--force", "--output", outputPath.absolutePath, apkPath.absolutePath)
-            .flatMapObservable { Processes.execute("unzip", apkPath.absolutePath, "classes*.dex", "-d", outputPath.absolutePath) }
+            .flatMapObservable { Processes.execute("unzip", apkPath.absolutePath, "classes*.dex", "-d", outputPath.absolutePath, validExitCodes = listOf(0, 11)) }
             .ignoreElements()
             .andThen(Single.just(outputPath))
     }
