@@ -52,7 +52,7 @@ class FridaServer private constructor(private val binary: File) {
                 Github.getReleaseUrl("frida", "frida", version, "frida-server-${version}-android-${cpuAbi}.xz")
             ).flatMap { xzPath ->
                 Processes.execute("xz", "-d", xzPath.absolutePath).ignoreElements()
-                    .andThen(Single.just(File(xzPath.absolutePath.replace(Regex("\\.zx$", RegexOption.IGNORE_CASE), ""))))
+                    .andThen(Single.just(File(xzPath.absolutePath.replace(Regex("\\.xz$", RegexOption.IGNORE_CASE), ""))))
             }
         }
     }
