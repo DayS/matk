@@ -1,6 +1,6 @@
 package fr.matk
 
-import com.github.ajalt.clikt.core.NoRunCliktCommand
+import com.github.ajalt.clikt.core.NoOpCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.squareup.moshi.Moshi
 import fr.matk.command.apk.ApkCommand
@@ -19,7 +19,7 @@ val matkModule = module {
     single { Moshi.Builder().build() }
 }
 
-class Matk : NoRunCliktCommand()
+class Matk : NoOpCliktCommand()
 
 fun main(args: Array<String>) {
     startKoin {

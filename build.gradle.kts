@@ -34,7 +34,7 @@ dependencies {
     implementation("org.koin:koin-core:2.0.1")
 
     // CLI
-    implementation("com.github.ajalt:clikt:2.3.0")
+    implementation("com.github.ajalt:clikt:2.8.0")
 
     // Network
     implementation("com.squareup.okhttp3:okhttp:4.2.2")
