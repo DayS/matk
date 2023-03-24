@@ -27,19 +27,21 @@ class ApkPullCommand : CliktCommand(name = "pull") {
             .toList()
             .flatMap { packages ->
                 if (packages.size > 1) {
+                    logger.error("Too many packages result (${packages.size}): \n" + packages.joinToString("\n") { it.packageId })
                     Single.error(CommandException("Too many packages result (${packages.size})"))
                 } else {
-                    val apkPath = packages.first().path
-                    val localPath = localFile ?: File("${apkPath.absolutePath}.apk")
+                    val apkPackage = packages.first()
+                    val apkPath = apkPackage.path
+                    val localPath = localFile ?: File("${apkPackage.packageId}.apk")
 
                     logger.info("Found APK %s. Pulling to %s", apkPath, localPath)
 
                     adb.pullFile(apkPath, localPath)
                 }
             }
-            .subscribe(
-                { logger.info("APK pulled") },
-                { throwable -> logger.error("Unable to pull APK", throwable) })
+            .doOnSuccess { logger.info("APK pulled") }
+            .doOnError { throwable -> logger.error("Unable to pull APK", throwable) }
+            .subscribe({ }, { })
     }
 
 }
