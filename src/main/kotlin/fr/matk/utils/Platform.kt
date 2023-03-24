@@ -7,7 +7,7 @@ sealed class Platform {
 
     companion object {
         fun get(): Platform {
-            val osName = System.getProperty("os.name").toLowerCase()
+            val osName = System.getProperty("os.name").lowercase()
             return when {
                 osName.contains("windows") -> Windows
                 osName.contains("mac") -> MacOs
