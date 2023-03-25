@@ -49,11 +49,22 @@ class Jadx private constructor(private val binary: File) {
 
     }
 
+    fun decompileApk(apkPath: File, outputPath: File, mainApkFile: Boolean): Single<File> {
+        val args = (if (mainApkFile) arrayOf("--export-gradle") else emptyArray()) +
+            arrayOf(
+                "--output-dir", outputPath.absolutePath,
+                "--show-bad-code",
+                apkPath.absolutePath
+            )
+
+        return exec(*args).map { outputPath }
+    }
+
     fun findAndDecompileDexFiles(lookupFolder: File) = Single.defer<File> {
         logger.info("Looking for DEX to decompile as Java files from {}", lookupFolder)
 
         Single.just(lookupFolder)
-            .flattenAsObservable { it.listFiles { _, name -> name.matches(patternDexFile) }?.toList() }
+            .flattenAsObservable { it.listFiles { _, name -> name.matches(patternDexFile) }?.toList() ?: emptyList() }
             .doOnNext { logger.debug("Decompiling DEX {}", it) }
             .concatMapSingle { decompileDex(it, lookupFolder) }
             .ignoreElements()
@@ -61,7 +72,13 @@ class Jadx private constructor(private val binary: File) {
     }
 
     fun decompileDex(dexPath: File, outputPath: File): Single<File> =
-        exec("--output-dir", outputPath.absolutePath, "--no-res", "--show-bad-code", "--export-gradle", dexPath.absolutePath)
+        exec(
+            "--output-dir", outputPath.absolutePath,
+            "--no-res",
+            "--show-bad-code",
+            "--export-gradle",
+            dexPath.absolutePath
+        )
             .map { outputPath }
 
     private fun exec(vararg commands: String): Single<String> =
