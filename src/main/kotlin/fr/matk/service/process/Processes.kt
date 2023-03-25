@@ -39,8 +39,6 @@ object Processes {
                 b.directory(directory)
             }
 
-            b.redirectError(b.redirectInput())
-
             try {
                 b.start()
             } catch (e: IOException) {
@@ -81,7 +79,8 @@ object Processes {
                 if (validExitCodes.contains(exitCode)) {
                     emitter.onComplete()
                 } else {
-                    emitter.onError(ExecProcessException(exitCode, null))
+                    val errorContent = process.errorStream.bufferedReader().use { it.readText() }
+                    emitter.onError(ExecProcessException(exitCode, errorContent))
                 }
             }
 
@@ -89,6 +88,7 @@ object Processes {
         }
 
         val disposeAction = Consumer<Process> {
+            logger.debug("Destroy process {}", commandAndArgs)
             it.destroy()
         }
 
