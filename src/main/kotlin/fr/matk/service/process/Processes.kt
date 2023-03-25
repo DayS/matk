@@ -30,9 +30,7 @@ object Processes {
         verbose: Boolean = false,
         validExitCodes: List<Int> = listOf(0)
     ): Observable<String> {
-        val resourceFactory = Callable<Process> {
-            logger.trace("Execute process {}", commandAndArgs)
-
+        val resourceFactory = Callable {
             val b = ProcessBuilder(commandAndArgs)
             b.environment().putAll(env)
             if (directory != null) {
@@ -40,14 +38,16 @@ object Processes {
             }
 
             try {
-                b.start()
+                b.start().apply {
+                    logger.debug("\u001B[34;1m\$ {}\u001B[0m", commandAndArgs.joinToString(" "))
+                }
             } catch (e: IOException) {
                 throw StartProcessException("Unable to start process", e)
             }
         }
 
         val factory = Function<Process, Observable<String>> { process ->
-            val output = Observable.create<String> { emitter ->
+            Observable.create { emitter ->
                 try {
                     process.inputStream.bufferedReader().use {
                         it.forEachLine { line ->
@@ -55,44 +55,37 @@ object Processes {
                                 throw InterruptedProcessException()
                             }
 
-                            if (verbose) {
-                                logger.trace("[{}] {}", process.pid(), line)
-                            }
+                            logger.trace("▸ {}", line)
                             emitter.onNext(line)
                         }
                     }
-                    emitter.onComplete()
+
+                    val exitCode = process.waitFor()
+
+                    if (validExitCodes.contains(exitCode)) {
+                        emitter.onComplete()
+                    } else {
+                        val errorContent = process.errorStream.bufferedReader().use { it.readText() }
+                        emitter.onError(ExecProcessException(exitCode, errorContent))
+
+                        logger.debug("=> Exit with error code {}", exitCode)
+                    }
                 } catch (e: Exception) {
                     if (e !is InterruptedProcessException) {
                         emitter.onError(e)
                     }
+                } finally {
+                    process.destroy()
+                    logger.debug("")
                 }
             }
-
-            val completion = Observable.create<String> { emitter ->
-                val exitCode = process.waitFor()
-
-                if (verbose) {
-                    logger.trace("[{}] Exit {}", process.pid(), exitCode)
-                }
-
-                if (validExitCodes.contains(exitCode)) {
-                    emitter.onComplete()
-                } else {
-                    val errorContent = process.errorStream.bufferedReader().use { it.readText() }
-                    emitter.onError(ExecProcessException(exitCode, errorContent))
-                }
-            }
-
-            output.concatWith(completion)
         }
 
         val disposeAction = Consumer<Process> {
-            logger.debug("Destroy process {}", commandAndArgs)
             it.destroy()
         }
 
-        return Observable.using<String, Process>(resourceFactory, factory, disposeAction)
+        return Observable.using(resourceFactory, factory, disposeAction)
     }
 
 }

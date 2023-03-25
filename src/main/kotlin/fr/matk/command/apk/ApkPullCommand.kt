@@ -34,14 +34,14 @@ class ApkPullCommand : CliktCommand(name = "pull") {
                     val apkPath = apkPackage.path
                     val localPath = localFile ?: File("${apkPackage.packageId}.apk")
 
-                    logger.info("Found APK %s. Pulling to %s", apkPath, localPath)
+                    logger.info("Found APK {}. Pulling to {}", apkPath, localPath)
 
                     adb.pullFile(apkPath, localPath)
                 }
             }
-            .doOnSuccess { logger.info("APK pulled") }
-            .doOnError { throwable -> logger.error("Unable to pull APK", throwable) }
-            .subscribe({ }, { })
+            .subscribe(
+                { logger.info("APK pulled") },
+                { throwable -> logger.error("Unable to pull APK", throwable) })
     }
 
 }

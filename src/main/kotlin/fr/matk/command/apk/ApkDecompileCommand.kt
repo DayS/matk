@@ -35,9 +35,10 @@ class ApkDecompileCommand : CliktCommand(name = "decompile") {
         Single.zip(apktoolFactory, jadxFactory) { apktool: Apktool, jadx: Jadx -> Pair(apktool, jadx) }
             .flatMapObservable { tools ->
                 if (apkFile.extension == "xapk") {
-                    logger.info("XAPK detected. Extracting all split files")
+                    logger.debug("XAPK detected. Extracting all split files")
                     decompileXapk(tools, apkFile, outputFile)
                 } else {
+                    logger.debug("Decompiling APK file {}", apkFile)
                     decompileApk(tools, apkFile, outputFile, true)
                         .toObservable()
                 }
@@ -53,7 +54,7 @@ class ApkDecompileCommand : CliktCommand(name = "decompile") {
         return Zip.extractFiles(apkFile, outputFile)
             .filter { it.extension == "apk" }
             .flatMapSingle {
-                logger.debug("Extracting file {}", it)
+                logger.debug("Decompiling split APK file {}", it)
                 decompileApk(tools, it, File("${it.absolutePath}.out"), it.name == mainApkFile)
             }
     }
