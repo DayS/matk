@@ -16,7 +16,7 @@ class FridaInstallServerCommand : CliktCommand(name = "install-server", help = "
         .file()
         .default(File(FridaServer.DEFAULT_REMOTE_PATH))
     private val fridaVersion by option("-v", "--version", help = "Frida server's version. 'auto' for resolving with local frida instance, 'latest' or empty for downloading latest, or a specific version")
-        .default(FridaServer.VERSION_AUTO)
+        .default(FridaServer.VERSION_LATEST)
 
     private val logger by LoggerDelegate()
     private val adb = Adb(device)

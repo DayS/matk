@@ -3,6 +3,8 @@ package fr.matk.command.apk
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.optional
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
@@ -23,6 +25,7 @@ class ApkDecompileCommand : CliktCommand(name = "decompile") {
     private val outputDir by argument("output_dir", "Output folder for decompiled app").file(
         canBeFile = false
     ).optional()
+    private val asProject by option("-p", "--as-project", help = "Indicate if a project-like structure should be created (not suitable for recompiling it later with MATK").flag()
 
     private val logger by LoggerDelegate()
 
@@ -67,7 +70,12 @@ class ApkDecompileCommand : CliktCommand(name = "decompile") {
     }
 
     private fun decompileApk(tools: Pair<Apktool, Jadx>, apkFile: File, outputFile: File, mainApkFile: Boolean): Single<File> {
-        return tools.second.decompileApk(apkFile, outputFile, mainApkFile)
+        return if (asProject) {
+            tools.second.decompileApk(apkFile, outputFile, mainApkFile)
+        } else {
+            return tools.first.decompileApk(apkFile, outputFile)
+                .flatMap { tools.second.decompileApk(apkFile, outputFile, false) }
+        }
     }
 }
 
