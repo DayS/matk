@@ -51,9 +51,11 @@ class CharlesCertificate : Certificate(), KoinComponent {
 
         cache.getOrFetch(
             relativeCertificatePath,
-            Processes.execute(binary.absolutePath, "ssl", "export", certificateFile.absolutePath)
-                .ignoreElements()
-                .toSingleDefault(certificateFile)
+            Single.defer {
+                Processes.execute(binary.absolutePath, "ssl", "export", certificateFile.absolutePath)
+                    .ignoreElements()
+                    .toSingleDefault(certificateFile)
+            }
         )
     }
 

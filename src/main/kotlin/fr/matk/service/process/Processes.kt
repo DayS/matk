@@ -49,34 +49,34 @@ object Processes {
         val factory = Function<Process, Observable<String>> { process ->
             Observable.create { emitter ->
                 try {
-                    process.inputStream.bufferedReader().use {
-                        it.forEachLine { line ->
-                            if (emitter.isDisposed) {
-                                throw InterruptedProcessException()
-                            }
+                    emitter.setCancellable { process.destroy() }
 
-                            logger.trace("▸ {}", line)
-                            emitter.onNext(line)
+                    process.inputStream.bufferedReader().use { reader ->
+                        while (true) {
+                            reader.readLine()?.also {
+                                logger.trace("▸ {}", it)
+                                emitter.onNext(it)
+                            } ?: break
                         }
                     }
 
                     val exitCode = process.waitFor()
 
                     if (validExitCodes.contains(exitCode)) {
+                        logger.debug("")
                         emitter.onComplete()
                     } else {
                         val errorContent = process.errorStream.bufferedReader().use { it.readText() }
-                        emitter.onError(ExecProcessException(exitCode, errorContent))
 
                         logger.debug("=> Exit with error code {}", exitCode)
+                        logger.debug("")
+
+                        emitter.onError(ExecProcessException(exitCode, errorContent))
                     }
                 } catch (e: Exception) {
                     if (e !is InterruptedProcessException) {
                         emitter.onError(e)
                     }
-                } finally {
-                    process.destroy()
-                    logger.debug("")
                 }
             }
         }

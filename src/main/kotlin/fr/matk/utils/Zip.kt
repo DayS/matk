@@ -1,7 +1,6 @@
 package fr.matk.utils
 
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -16,22 +15,19 @@ object Zip {
             zipFile.stream().forEach { zipEntry ->
                 if (entryMatcher?.invoke(zipEntry) != false) {
                     val outputFile = File(outputFolder, zipEntry.name)
-                    extractFile(zipFile, zipEntry, outputFile)
+                    if (zipEntry.isDirectory) {
+                        outputFile.mkdirs()
+                    } else {
+                        extractFile(zipFile, zipEntry, outputFile)
+                    }
                     emitter.onNext(outputFile)
                 }
             }
         }
         emitter.onComplete()
-    }.subscribeOn(Schedulers.io())
-
-    fun extractFile(zip: File, fileEntry: String, outputFile: File) {
-        ZipFile(zip).use {
-            val zipEntry = it.getEntry(fileEntry) ?: throw ZipException("Zip entry not found in at $fileEntry")
-            extractFile(it, zipEntry, outputFile)
-        }
     }
 
-    fun extractFile(zipFile: ZipFile, zipEntry: ZipEntry, outputFile: File) {
+    private fun extractFile(zipFile: ZipFile, zipEntry: ZipEntry, outputFile: File) {
         outputFile.parentFile.mkdirs()
 
         FileOutputStream(outputFile).use { out ->
@@ -48,7 +44,7 @@ object Zip {
         }
     }
 
-    fun readFile(zipFile: ZipFile, zipEntry: ZipEntry): InputStream {
+    private fun readFile(zipFile: ZipFile, zipEntry: ZipEntry): InputStream {
         if (!zipEntry.isDirectory) {
             return zipFile.getInputStream(zipEntry)
         }

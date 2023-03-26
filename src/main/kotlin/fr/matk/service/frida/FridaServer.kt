@@ -30,7 +30,7 @@ class FridaServer private constructor(private val binary: File) {
             resolveVersion(version)
                 .flatMap { resolvedVersion ->
                     val filterCpuAbi = filterCpuAbi(cpuAbi)
-                    cache.getOrFetch("frida/${resolvedVersion}/${filterCpuAbi}/frida-server", downloadAndExtractRelease(resolvedVersion, filterCpuAbi))
+                    cache.getOrFetch("frida/${resolvedVersion}/${filterCpuAbi}/frida-server", Single.defer { downloadAndExtractRelease(resolvedVersion, filterCpuAbi) })
                 }
                 .map { FridaServer(it) }
         }

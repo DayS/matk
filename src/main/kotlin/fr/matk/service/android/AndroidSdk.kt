@@ -45,15 +45,17 @@ class AndroidSdk private constructor(private val androidHome: File) : KoinCompon
 
         return cache.getOrFetch(
             relativePath,
-            Processes.execute(
-                "keytool", "-genkey", "-v",
-                "-keystore", fullPath.absolutePath, "-alias", alias,
-                "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000",
-                "-dname", "CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown",
-                "-storepass", password, "-keypass", password
-            )
-                .ignoreElements()
-                .andThen(Single.just(fullPath))
+            Single.defer {
+                Processes.execute(
+                    "keytool", "-genkey", "-v",
+                    "-keystore", fullPath.absolutePath, "-alias", alias,
+                    "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000",
+                    "-dname", "CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown",
+                    "-storepass", password, "-keypass", password
+                )
+                    .ignoreElements()
+                    .andThen(Single.just(fullPath))
+            }
         )
     }
 

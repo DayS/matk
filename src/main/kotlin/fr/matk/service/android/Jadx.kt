@@ -25,7 +25,9 @@ class Jadx private constructor(private val binary: File) {
             logger.debug("Retrieving Jadx {}", version)
 
             resolveVersion(version)
-                .flatMap { resolvedVersion -> cache.getOrFetch("jadx/jadx-${resolvedVersion}/bin/jadx", downloadAndExtract(resolvedVersion)) }
+                .flatMap { resolvedVersion ->
+                    cache.getOrFetch("jadx/jadx-${resolvedVersion}/bin/jadx", Single.defer { downloadAndExtract(resolvedVersion) })
+                }
                 .map { Jadx(it) }
         }
 
@@ -34,9 +36,10 @@ class Jadx private constructor(private val binary: File) {
             val url = Github.getReleaseUrl("skylot", "jadx", version, "jadx-${cleanedVersion}.zip")
 
             return cache.getOrDownload("jadx/jadx-${version}.zip", url)
-                .map { Pair(it, File(it.parentFile, it.nameWithoutExtension)) }
-                .flatMap { (zipFile, outputFolder) ->
-                    Zip.extractFiles(zipFile, outputFolder)
+                .flatMap {
+                    val outputFolder = File(it.parentFile, it.nameWithoutExtension)
+                    
+                    Zip.extractFiles(it, outputFolder)
                         .ignoreElements()
                         .toSingle { File(outputFolder, "bin/jadx").apply { this.setExecutable(true) } }
                 }
