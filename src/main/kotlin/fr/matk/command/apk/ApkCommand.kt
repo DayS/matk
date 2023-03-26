@@ -7,6 +7,7 @@ class ApkCommand : NoOpCliktCommand(name = "apk", help = "Interaction with APK f
     init {
         subcommands(
             ApkPullCommand(),
+            ApkDownloadCommand(),
             ApkDecompileCommand(),
             ApkRecompileCommand()
         )
