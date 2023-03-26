@@ -1,9 +1,9 @@
 package fr.matk.command.device
 
-import com.github.ajalt.clikt.core.NoRunCliktCommand
+import com.github.ajalt.clikt.core.NoOpCliktCommand
 import com.github.ajalt.clikt.core.subcommands
 
-class DeviceCommand : NoRunCliktCommand(name = "device") {
+class DeviceCommand : NoOpCliktCommand(name = "device") {
     init {
         subcommands(
             DeviceInstallPlayStoreCommand()
