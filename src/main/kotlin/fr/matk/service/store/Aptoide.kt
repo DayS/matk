@@ -21,7 +21,7 @@ class Aptoide : KoinComponent {
 
     fun searchPackages(pattern: String, exactMatch: Boolean = false, countryCode: String = "en"): Observable<SearchResultItem> {
         return rest.restGet(URL("https://web-api-cache.aptoide.com/search?query=$pattern&country=$countryCode&mature=false"))
-            .doOnSubscribe { logger.debug("Searching app from store with query {}", pattern) }
+            .doOnSubscribe { logger.debug("Searching app from store '{}' with query '{}'", countryCode, pattern) }
             .flatMapObservable { json ->
                 moshi.adapter(SearchResult::class.java).fromJson(json)?.let { Observable.fromIterable(it.datalist.list) } ?: Observable.error(IOException("Response shouldn't be null"))
             }
